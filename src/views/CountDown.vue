@@ -4,106 +4,146 @@
       {{ formatTime }}
     </div>
     <div>
-      <button v-on:click="startTimer" v-if="!timerOn">Start</button>
-      <button v-on:click="stopTimer" v-if="timerOn">Stop</button>
-      <button v-on:click="resetTimer">Reset</button>
+      <button
+        class="btn"
+        v-on:click="startTimer"
+        v-if="!countDownStore.$data.timerOn"
+      >
+        Start
+      </button>
+      <button
+        class="btn"
+        v-on:click="stopTimer"
+        v-if="countDownStore.$data.timerOn"
+      >
+        Stop
+      </button>
+      <button class="btn" v-on:click="setTimer">Set</button>
+      <button class="btn" v-on:click="resetTimer">Reset</button>
     </div>
     <div>
-      <button v-on:click="increaseTimeByOneMinute">1分+</button>
-      <button v-on:click="decreaseTimeByOneMinute">1分-</button>
-      <button v-on:click="increaseTimeByOneSecond">1秒+</button>
-      <button v-on:click="decreaseTimeByOneSecond">1秒-</button>
+      <button class="btn" v-on:click="increaseTimeByOneMinute">
+        1分+
+      </button>
+      <button class="btn" v-on:click="decreaseTimeByOneMinute">
+        1分-
+      </button>
+    </div>
+    <div>
+      <button class="btn" v-on:click="increaseTimeByOneSecond">
+        1秒+
+      </button>
+      <button class="btn" v-on:click="decreaseTimeByOneSecond">
+        1秒-
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import countDownStore from "@/store/countDownStore.js";
+
 export default {
   name: "count-down",
   data() {
     return {
-      setMin: 0,
-      setSec: 0,
-      currentMin: 0,
-      currentSec: 0,
-      timerOn: false,
-      timerObj: null,
+      countDownStore,
     };
   },
   methods: {
     timeCount: function() {
-      if (this.currentSec <= 0 && this.currentMin >= 1) {
-        this.currentMin--;
-        this.currentSec = 59;
-      } else if (this.currentSec <= 0 && this.currentMin <= 0) {
-        this.timeUp();
+      if (
+        this.countDownStore.$data.currentSec <= 0 &&
+        this.countDownStore.$data.currentMin >= 1
+      ) {
+        this.countDownStore.$data.currentMin--;
+        this.countDownStore.$data.currentSec = 59;
+      } else if (
+        this.countDownStore.$data.currentSec <= 0 &&
+        this.countDownStore.$data.currentMin <= 0
+      ) {
+        this.countDownStore.$data.timeUp();
       } else {
-        this.currentSec--;
+        this.countDownStore.$data.currentSec--;
       }
     },
 
     startTimer: function() {
-      this.setMin = this.currentMin;
-      this.setSec = this.currentSec;
-      if (this.setMin == 0 && this.setSec == 0) {
+      this.countDownStore.$data.setMin = this.countDownStore.$data.currentMin;
+      this.countDownStore.$data.setSec = this.countDownStore.$data.currentSec;
+      if (
+        this.countDownStore.$data.setMin == 0 &&
+        this.countDownStore.$data.setSec == 0
+      ) {
         return;
       }
 
       let self = this;
-      this.timerObj = setInterval(function() {
+      this.countDownStore.$data.timerObj = setInterval(function() {
         self.timeCount();
       }, 1000);
-      this.timerOn = true;
+      this.countDownStore.$data.timerOn = true;
     },
 
     stopTimer: function() {
-      clearInterval(this.timerObj);
-      this.timerOn = false;
+      clearInterval(this.countDownStore.$data.timerObj);
+      this.countDownStore.$data.timerOn = false;
     },
 
     timeUp: function() {
-      if (this.setMin != 0 || this.setSec != 0) {
+      if (
+        this.countDownStore.$data.setMin != 0 ||
+        this.countDownStore.$data.setSec != 0
+      ) {
         alert("Time Up");
       }
-      this.timerOn = false;
-      clearInterval(this.timerObj);
+      this.countDownStore.$data.timerOn = false;
+      clearInterval(this.countDownStore.$data.timerObj);
+    },
+
+    setTimer: function() {
+      clearInterval(this.countDownStore.$data.timerObj);
+      this.countDownStore.$data.currentMin = this.countDownStore.$data.setMin;
+      this.countDownStore.$data.currentSec = this.countDownStore.$data.setSec;
     },
 
     resetTimer: function() {
-      clearInterval(this.timerObj);
-      this.currentMin = this.setMin;
-      this.currentSec = this.setSec;
+      clearInterval(this.countDownStore.$data.timerObj);
+      this.countDownStore.$data.setMin = 0;
+      this.countDownStore.$data.setSec = 0;
+      this.countDownStore.$data.currentMin = 0;
+      this.countDownStore.$data.currentSec = 0;
     },
 
     increaseTimeByOneMinute: function() {
-      if (this.currentMin < 59) {
-        this.currentMin += 1;
+      if (this.countDownStore.$data.currentMin < 59) {
+        this.countDownStore.$data.currentMin += 1;
       }
     },
 
     decreaseTimeByOneMinute: function() {
-      if (0 < this.currentMin) {
-        this.currentMin -= 1;
+      if (0 < this.countDownStore.$data.currentMin) {
+        this.countDownStore.$data.currentMin -= 1;
       }
     },
 
     increaseTimeByOneSecond: function() {
-      if (this.currentSec < 59) {
-        this.currentSec += 1;
+      if (this.countDownStore.$data.currentSec < 59) {
+        this.countDownStore.$data.currentSec += 1;
       }
     },
 
     decreaseTimeByOneSecond: function() {
-      if (0 < this.currentSec) {
-        this.currentSec -= 1;
+      if (0 < this.countDownStore.$data.currentSec) {
+        this.countDownStore.$data.currentSec -= 1;
       }
     },
   },
   computed: {
     formatTime: function() {
       let timeStrings = [
-        this.currentMin.toString(),
-        this.currentSec.toString(),
+        this.countDownStore.$data.currentMin.toString(),
+        this.countDownStore.$data.currentSec.toString(),
       ].map(function(str) {
         if (str.length < 2) {
           return "0" + str;
@@ -125,5 +165,9 @@ export default {
 }
 .time {
   font-size: 100px;
+}
+
+.btn {
+  margin: 10px 5px;
 }
 </style>
